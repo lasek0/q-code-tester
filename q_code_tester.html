@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+<head>
+<title>Q code tester - SP6DEF</title>
+<script type="text/javascript">
+//source: http://www.egzaminkf.pl/viewpage.php?page_id=1
+var q_list = "\n\
+QAZ\tBurza, wyłączam stację\n\
+QHL\tPrzeszukiwanie pasma od największej częstotliwości\n\
+QHM\tPrzeszukiwanie pasma od największej do środkowej częstotliwości\n\
+QLH\tPrzeszukiwanie pasma od najmniejszej częstotliwości\n\
+QLM\tPrzeszukiwanie pasma od najmniejszej do środkowej częstotliwości\n\
+QMH\tPrzeszukiwanie pasma od środkowej do największej częstotliwości\n\
+QML\tPrzeszukiwanie pasma od środkowej do najmniejszej częstotliwości\n\
+QQQ\tMuszę przerwać łączność, wyjaśnienia później\n\
+QRA\tMoja stacja nazywa się...\n\
+QRAR\tMój adres w callbooku jest dokładny i prawidłowy\n\
+QRB\tOdległość między naszymi stacjami wynosi ... km\n\
+QRD\tZdążamy do... z...\n\
+QRE\tPrzypuszczalnie przybędziemy do ... o ... godzinie\n\
+QRF\tWracamy (wracajcie) do ... (miejsce)\n\
+QRG\tTwoja częstotliwość wynosi...\n\
+QRH\tTwoja częstotliwość zmienia się, waha\n\
+QRI\tTwój ton jest: 1. dobry, 2. zmienny, 3. zły\n\
+QRJ\tWasze sygnały są bardzo słabe, nieodbieralne\n\
+QRK\tCzytelność waszych sygnałów wynosi (1...5)\n\
+QRL\tJestem zajęty, proszę nie przeszkadzać\n\
+QRM\tMam przeszkody w odbiorze, zakłócenia od innych stacji\n\
+QRN\tMam zakłócenia atmosferyczne\n\
+QRO\tZwiększ moc, duża moc\n\
+QRP\tZmniejsz moc, mała moc\n\
+QRQ\tNadawaj szybciej\n\
+QRR\tJestem gotowy do pracy automatycznej\n\
+QRRR\tZnak niebezpieczeństwa na lądzie (tylko w ruchu amatorskim)\n\
+QRS\tNadawaj wolniej\n\
+QRT\tKończę nadawanie, wyłączam stację, przerwij nadawanie!\n\
+QRU\tNie mam nic dla ciebie\n\
+QRV\tJestem gotów do pracy\n\
+QRW\tPrzekażcie ..., że go wołam na częstotliwości ...\n\
+QRX\tProszę poczekać, zawołam was o godzinie ...\n\
+QRY\tWasza kolejność jest...\n\
+QRZ\tWas woła..., kto mnie woła?\n\
+QSA\tSiła waszych sygnałów wynosi (1...9)\n\
+QSB\tSiła waszego sygnału waha się\n\
+QSD\tBłędnie nadajecie CW\n\
+QSI\tNie mogłem przerwać waszego nadawania\n\
+QSK\tMogę słuchać w przerwach nadawania (BK)\n\
+QSL\tPotwierdzam, przyślę kartę QSL\n\
+QSLL\tWymieńmy wzajemnie nasze karty QSL\n\
+QSLN\tNie trzeba wysyłać karty QSL\n\
+QSM\tProszę powtórzyć (RPT)\n\
+QSN\tSłuszałem was na ... kHz\n\
+QSO\tŁączność, mam połączenie\n\
+QSP\tPrzekażcie komunikat do...\n\
+QSQ\tNadawajcie każde słowo jeden raz\n\
+QSR\tPowtórzcie wasze wywołanie na częstotliwości wywoławczej\n\
+QSS\tChcemy używać częstotliwości roboczej ...\n\
+QST\tKomunikat dla wszystkich\n\
+QSU\tNadawajcie na częstotliwości ... kHz\n\
+QSUF\tProszę o łączność telefoniczną przewodową\n\
+QSV\tNadawajcie V dla strojenia\n\
+QSW\tPrzechodzę na częstotliwość...\n\
+QSX\tSłucham na częstotliwości...\n\
+QSY\tPrzejdźcie na częstotliwość...\n\
+QSZ\tNadawajcie każde słowo dwa razy (lub ... razy)\n\
+QTA\tAnulujcie radiogram nr... , jak gdyby nie był nadany\n\
+QTB\tNie zgadzam się z waszym obliczeniem ilości słów\n\
+QTC\tMam dla was wiadomość\n\
+QTG\tBędziemy nadawali po naszym znaku dwie \"kreski\", każda po 10 sek.\n\
+QTH\tMoje położenie geograficzne to...\n\
+QTN\tOpuściliśmy to miejsce o ... godzinie\n\
+QTR\tDokładny czas jest...\n\
+QTS\tBędziemy nadawali do pomiarów nasz sygnał wywoławczy przez ... minut\n\
+QTT\tSygnał rozpoznawczy który nastąpi jest nałożony na inną transmisję\n\
+QTU\tPracuję od ... do ...\n\
+QTV\tNasłuchujcie za nas na częstotliwości ... ( od ... do ... godziny)\n\
+QTX\tBędziemy w pogotowiu do dalszej łączności z wami\n\
+QUA\tPrzekazuję wiadomość od ...\n\
+QUB\tOto żądane wiadomości ...\n\
+QUH\tCiśnienie barometryczne wynosi ...\n\
+QUM\tMogę już podjąć normalną pracę\n\
+QWX\tStan pogody\n\
+";
+
+var q_code = [];
+var q_desc = [];
+
+var q = q_list.split("\n");
+for(const i in q){
+  var x = q[i].trim();
+  if(x.length > 0){
+    var y = x.split("\t");
+    q_code.push(y[0].trim());
+    q_desc.push(y[1].trim());
+  }
+}
+
+var score = 0;
+var tries = 0;
+
+function RandInt(max){
+  return Math.floor(Math.random() * max);
+}
+
+function MixItWell(){
+  var r = [];
+  while(r.length < 3){
+    var n = RandInt(q_code.length);
+    var found = false;
+    for(var i=0; i<r.length; i++){
+      if(r[i] == n){
+        found = true;
+      }
+    }
+    if(found == false){
+      r.push(n);
+    }
+  }
+  return r;
+}
+
+
+var correct = -1;
+window.onload = function(){
+  reload();
+}
+
+function reload(){
+  document.body.ondblclick = function(){};
+  var opt = [ 
+    document.getElementById("option0"),
+    document.getElementById("option1"),
+    document.getElementById("option2")
+  ];
+  var quest = document.getElementById("question");
+  var r = MixItWell();
+  correct = RandInt(3);
+  if(RandInt(2)){
+    quest.innerHTML = q_desc[r[correct]];
+    for(var i=0; i<opt.length; i++){
+      opt[i].innerHTML = q_code[r[i]];
+    }
+  }else{
+    quest.innerHTML = q_code[r[correct]];
+    for(var i=0; i<opt.length; i++){
+      opt[i].innerHTML = q_desc[r[i]];
+    }
+  }
+  for(var i=0; i<opt.length; i++){
+    if(i == correct){
+      opt[i].onclick = function(){ score += 1; tries += 1; show_anwsers(); }
+    }else{
+      opt[i].onclick = function(){ score -= 1; tries += 1; show_anwsers(); }
+    }
+    opt[i].style = "background-color: #cccccc";
+  }
+}
+
+function show_anwsers(){
+  var opt = [ 
+    document.getElementById("option0"),
+    document.getElementById("option1"),
+    document.getElementById("option2")
+  ];
+  for(var i=0; i<opt.length; i++){
+    opt[i].style = "background-color: #" + (i == correct? "00cc00":"cc0000");
+    opt[i].onclick = function(){};
+  }
+  document.body.ondblclick = function(){  reload(); };
+  document.getElementById("score").innerHTML = score;
+  document.getElementById("efficiency").innerHTML = Math.floor(score * 100 / tries) + '%';
+}
+
+</script>
+<style>
+body{
+text-align:center;
+}
+.button{
+padding: 10px;
+margin: 10px;
+font-size: 38px;
+font-family: Consolas;
+color: #000000;
+text-decoration: none;
+background-color: #cccccc;
+user-select: none;
+}
+.button:hover{
+background-color: #aaaaaa;
+color: #000000;
+}
+.question{
+padding: 10px;
+margin: 10px;
+font-size: 38px;
+font-family: Consolas;
+user-select: none;
+}
+</style>
+</head>
+<body><br/><br/><br/><br/><br/><br/>
+Punkty: <span id="score">0</span><br/>
+Skuteczność: <span id="efficiency">0%</span><br/>
+<div id="question" class="question"></div><br/><br/><br/>
+<a href="#" id="option0" class="button">A</a><br/><br/><br/>
+<a href="#" id="option1" class="button">B</a><br/><br/><br/>
+<a href="#" id="option2" class="button">C</a><br/><br/><br/>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<div>kliknij na odpowiedź, poprawna podświedli się na zielono a błędne na czerwono. Aby rozpoczać nowy kod Q, kliknij 2x na pustym tle.</div><br/>
+<div>Q code tester - SP6DEF</div>
+</body>
+</html>
